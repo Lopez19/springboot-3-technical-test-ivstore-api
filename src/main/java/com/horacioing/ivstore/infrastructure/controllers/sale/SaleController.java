@@ -75,7 +75,7 @@ public class SaleController {
         ).body(
                 DataSaleResponse.builder()
                         .id(saleSaved.getId())
-                        .createdAt(saleSaved.getCreateAt())
+                        .createdAt(saleSaved.getCreateAt().toLocalDate())
                         .employeeName(saleSaved.getEmployee().getName())
                         .storeName(saleSaved.getStore().getName())
                         .items(itemsResponseList)
@@ -104,7 +104,7 @@ public class SaleController {
         return saleFound.map(sale -> ResponseEntity.ok(
                 DataSaleResponse.builder()
                         .id(sale.getId())
-                        .createdAt(sale.getCreateAt())
+                        .createdAt(sale.getCreateAt().toLocalDate())
                         .employeeName(sale.getEmployee().getName())
                         .storeName(sale.getStore().getName())
                         .total(sale.getTotal())
@@ -131,7 +131,7 @@ public class SaleController {
 
         return ResponseEntity.ok(sales.map(sale -> DataSaleResponse.builder()
                 .id(sale.getId())
-                .createdAt(sale.getCreateAt())
+                .createdAt(sale.getCreateAt().toLocalDate())
                 .employeeName(sale.getEmployee().getName())
                 .storeName(sale.getStore().getName())
                 .items(dataItemsResponsesList)
