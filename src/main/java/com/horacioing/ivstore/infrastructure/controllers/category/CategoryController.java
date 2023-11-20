@@ -16,6 +16,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/categories")
 @AllArgsConstructor
 @Tag(name = "Category", description = "Category API")
+@CrossOrigin(origins = "*")
 public class CategoryController {
 
     private final CategoryService service;

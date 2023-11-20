@@ -16,6 +16,7 @@ import java.util.Optional;
 @RequestMapping("api/v1/users")
 @AllArgsConstructor
 @Tag(name = "User", description = "User API")
+@CrossOrigin(origins = "*")
 public class UserController {
     private final UserService userService;
 

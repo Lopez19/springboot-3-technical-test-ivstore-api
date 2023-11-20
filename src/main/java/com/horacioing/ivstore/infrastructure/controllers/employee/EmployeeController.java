@@ -16,6 +16,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/employ")
 @AllArgsConstructor
 @Tag(name = "Employee", description = "Employee API")
+@CrossOrigin(origins = "*")
 public class EmployeeController {
 
     private final EmployeeService employeeService;

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/v1/items")
 @AllArgsConstructor
 @Tag(name = "Items", description = "The Items API")
+@CrossOrigin(origins = "*")
 public class ItemController {
 
     private final ItemService itemService;

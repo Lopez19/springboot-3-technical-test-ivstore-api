@@ -16,6 +16,7 @@ import java.util.Optional;
 @RequestMapping("api/v1/roles")
 @AllArgsConstructor
 @Tag(name = "Roles", description = "Roles API")
+@CrossOrigin(origins = "*")
 public class RoleController {
 
     private final RoleService roleService;

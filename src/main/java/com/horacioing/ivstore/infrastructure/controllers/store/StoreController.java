@@ -16,6 +16,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/store")
 @AllArgsConstructor
 @Tag(name = "Store", description = "Store API")
+@CrossOrigin(origins = "*")
 public class StoreController {
 
     private final StoreService storeService;
