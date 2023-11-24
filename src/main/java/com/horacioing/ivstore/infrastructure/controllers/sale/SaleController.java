@@ -4,6 +4,7 @@ import com.horacioing.ivstore.application.services.ItemService;
 import com.horacioing.ivstore.application.services.SaleService;
 import com.horacioing.ivstore.domain.models.item.Item;
 import com.horacioing.ivstore.domain.models.sale.Sale;
+import com.horacioing.ivstore.infrastructure.controllers.sale.utils.UtilsSales;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,9 +20,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 @RestController
 @RequestMapping("api/v1/sales")
@@ -143,38 +144,15 @@ public class SaleController {
     @GetMapping("/totalSalesGroupStore")
     public ResponseEntity<List<DataTotalResponse>> getTotalSalesGroupStore() {
 
-        List<DataTotalResponse> dataTotalSalesGroupStoreResponsesList = new ArrayList<>();
-        Random r = new Random();
+        List<DataTotalResponse> dataTotalResponsesList = saleService.getAllSales(Pageable.unpaged())
+                .stream()
+                .collect(Collectors.groupingBy(sale -> sale.getStore().getName()))
+                .entrySet()
+                .stream()
+                .map(entry -> UtilsSales.mapToDataTotalResponse(entry.getKey(), entry.getValue()))
+                .toList();
 
-        this.saleService.getAllSales(Pageable.unpaged()).stream().collect(
-                Collectors.groupingBy(sale -> sale.getStore().getName())
-        ).forEach((storeName, sales) -> dataTotalSalesGroupStoreResponsesList.add(
-                        DataTotalResponse.builder()
-                                .nameStore(storeName)
-                                .totalSales((int) sales.stream().mapToDouble(
-                                        sale -> sale.getTotal().doubleValue()
-                                ).count())
-                                .totalSalesAmount(sales.stream().mapToDouble(
-                                        sale -> sale.getTotal().doubleValue()
-                                ).sum())
-//                        .color("#" + Integer.toHexString((r.nextInt() * 16777215)))
-                                .color(sales.stream().map(sale -> sale.getStore().getColor()).findFirst().orElseGet(() -> "blue"))
-                                .salesForDate(sales.stream().map(sale -> sale.getCreateAt().toLocalDate()).toList())
-                                .salesForMonth(sales.stream().map(sale -> sale.getCreateAt().getMonth()).toList())
-                                .salesForYear(sales.stream().map(sale -> sale.getCreateAt().getYear()).toList())
-                                .salesTotalGroupByMonth(sales.stream().collect(
-                                        Collectors.groupingBy(sale -> sale.getCreateAt().getMonth().toString())
-                                ).entrySet().stream().map(entry -> DataTotalSalesGroupByMonthResponse.builder()
-                                        .month(entry.getKey())
-                                        .totalSales((int) entry.getValue().stream().mapToDouble(
-                                                sale -> sale.getTotal().doubleValue()
-                                        ).count())
-                                        .build()
-                                ).toList())
-                                .build()
-                )
-        );
-        return ResponseEntity.ok(dataTotalSalesGroupStoreResponsesList);
+        return ResponseEntity.ok(dataTotalResponsesList);
     }
 
     @GetMapping("/totalSalesGroupMonth")
@@ -195,6 +173,7 @@ public class SaleController {
 //        );
 
         //Si no hay ventas en un mes, se agrega el mes con total de ventas 0
+
         Stream.of(Month.values()).forEach(month -> {
 
             List<Sale> sales = this.saleService.getAllSales(Pageable.unpaged())
@@ -363,6 +342,7 @@ public class SaleController {
             @RequestParam(name = "endDate", required = false)
             String endDate
     ) {
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         List<Sale> sales;
 
@@ -388,32 +368,9 @@ public class SaleController {
                                             ).sum()))
                                             .build())
                             .salesByStore(
-                                    sales.stream().collect(
-                                            Collectors.groupingBy(sale -> sale.getStore().getName())
-                                    ).entrySet().stream().map(entry -> DataTotalResponse.builder()
-                                            .nameStore(entry.getKey())
-                                            .totalSales((int) entry.getValue().stream().mapToDouble(
-                                                    sale -> sale.getTotal().doubleValue()
-                                            ).count())
-                                            .totalSalesAmount(entry.getValue().stream().mapToDouble(
-                                                    sale -> sale.getTotal().doubleValue()
-                                            ).sum())
-                                            .color(entry.getValue().stream().map(sale -> sale.getStore().getColor()).findFirst().orElseGet(() -> "blue"))
-                                            .salesForDate(entry.getValue().stream().map(sale -> sale.getCreateAt().toLocalDate()).toList())
-                                            .salesForMonth(entry.getValue().stream().map(sale -> sale.getCreateAt().getMonth()).toList())
-                                            .salesForYear(entry.getValue().stream().map(sale -> sale.getCreateAt().getYear()).toList())
-                                            .salesTotalGroupByMonth(entry.getValue().stream().collect(
-                                                    Collectors.groupingBy(sale -> sale.getCreateAt().getMonth().toString())
-                                            ).entrySet().stream().map(entryMonth -> DataTotalSalesGroupByMonthResponse.builder()
-                                                    .month(entryMonth.getKey())
-                                                    .totalSales((int) entryMonth.getValue().stream().mapToDouble(
-                                                            sale -> sale.getTotal().doubleValue()
-                                                    ).count())
-                                                    .build()
-                                            ).toList())
-                                            .build()
-                                    ).toList()
-                            ).build()
+                                    UtilsSales.buildSalesDataRangeByStore(sales)
+                            )
+                            .build()
             );
 
         } else {
@@ -438,31 +395,7 @@ public class SaleController {
                                             ).sum()))
                                             .build())
                             .salesByStore(
-                                    sales.stream().collect(
-                                            Collectors.groupingBy(sale -> sale.getStore().getName())
-                                    ).entrySet().stream().map(entry -> DataTotalResponse.builder()
-                                            .nameStore(entry.getKey())
-                                            .totalSales((int) entry.getValue().stream().mapToDouble(
-                                                    sale -> sale.getTotal().doubleValue()
-                                            ).count())
-                                            .totalSalesAmount(entry.getValue().stream().mapToDouble(
-                                                    sale -> sale.getTotal().doubleValue()
-                                            ).sum())
-                                            .color(entry.getValue().stream().map(sale -> sale.getStore().getColor()).findFirst().orElseGet(() -> "blue"))
-                                            .salesForDate(entry.getValue().stream().map(sale -> sale.getCreateAt().toLocalDate()).toList())
-                                            .salesForMonth(entry.getValue().stream().map(sale -> sale.getCreateAt().getMonth()).toList())
-                                            .salesForYear(entry.getValue().stream().map(sale -> sale.getCreateAt().getYear()).toList())
-                                            .salesTotalGroupByMonth(entry.getValue().stream().collect(
-                                                    Collectors.groupingBy(sale -> sale.getCreateAt().getMonth().toString())
-                                            ).entrySet().stream().map(entryMonth -> DataTotalSalesGroupByMonthResponse.builder()
-                                                    .month(entryMonth.getKey())
-                                                    .totalSales((int) entryMonth.getValue().stream().mapToDouble(
-                                                            sale -> sale.getTotal().doubleValue()
-                                                    ).count())
-                                                    .build()
-                                            ).toList())
-                                            .build()
-                                    ).toList()
+                                    UtilsSales.buildSalesDataRangeByStore(sales)
                             )
                             .build()
             );

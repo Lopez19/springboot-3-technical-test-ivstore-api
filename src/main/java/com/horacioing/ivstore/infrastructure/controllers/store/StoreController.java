@@ -37,7 +37,7 @@ public class StoreController {
         );
 
         return ResponseEntity.created(
-                uriBuilder.path("/api/store/{id}")
+                uriBuilder.path("/api/v1/store/{id}")
                         .buildAndExpand(store.getId())
                         .toUri()
         ).body(store);

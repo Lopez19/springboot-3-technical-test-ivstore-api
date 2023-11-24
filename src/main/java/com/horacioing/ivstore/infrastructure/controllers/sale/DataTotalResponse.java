@@ -10,9 +10,6 @@ public record DataTotalResponse(
         Integer totalSales,
         String color,
         Double totalSalesAmount,
-        List<?> salesForDate,
-        List<?> salesForMonth,
-        List<?> salesForYear,
         List<?> salesTotalGroupByMonth
 ) {
 }
